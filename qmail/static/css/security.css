@@ -1,0 +1,467 @@
+/**
+ * QMail Security Styles
+ * Styles for security features like watermarks, alerts, and secure content
+ */
+
+/* Secure Content Container */
+.secure-content {
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    transition: filter 0.3s ease;
+}
+
+/* Prevent text selection in secure content */
+.secure-content::selection {
+    background: transparent;
+    color: inherit;
+}
+
+.secure-content::-moz-selection {
+    background: transparent;
+    color: inherit;
+}
+
+/* Security Watermark */
+.security-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.08;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: transform 1s ease;
+    mix-blend-mode: multiply;
+}
+
+.security-watermark .watermark-text {
+    padding: 10px 20px;
+    background: repeating-linear-gradient(
+        45deg,
+        rgba(0, 0, 0, 0.05),
+        rgba(0, 0, 0, 0.05) 10px,
+        rgba(0, 0, 0, 0.08) 10px,
+        rgba(0, 0, 0, 0.08) 20px
+    );
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+/* Dark mode watermark */
+@media (prefers-color-scheme: dark) {
+    .security-watermark {
+        color: #fff;
+        opacity: 0.05;
+    }
+    
+    .security-watermark .watermark-text {
+        background: repeating-linear-gradient(
+            45deg,
+            rgba(255, 255, 255, 0.05),
+            rgba(255, 255, 255, 0.05) 10px,
+            rgba(255, 255, 255, 0.08) 10px,
+            rgba(255, 255, 255, 0.08) 20px
+        );
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Security Toast Notification */
+.security-toast {
+    position: fixed;
+    bottom: -100px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10000;
+    transition: bottom 0.3s ease;
+    max-width: 400px;
+    font-size: 14px;
+}
+
+.security-toast.show {
+    bottom: 20px;
+}
+
+.security-toast i {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.security-toast span {
+    flex: 1;
+}
+
+/* Security Badge */
+.security-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.security-badge i {
+    font-size: 14px;
+}
+
+/* Security Warning Banner */
+.security-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 10px rgba(245, 87, 108, 0.3);
+}
+
+.security-warning i {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.security-warning .warning-content {
+    flex: 1;
+}
+
+.security-warning .warning-title {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.security-warning .warning-text {
+    font-size: 14px;
+    opacity: 0.95;
+}
+
+/* Security Info Box */
+.security-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.security-info h4 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.security-info ul {
+    margin: 10px 0 0 0;
+    padding-left: 20px;
+}
+
+.security-info li {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+/* Blurred Content (when window inactive) */
+.secure-content.blurred {
+    filter: blur(20px);
+    pointer-events: none;
+}
+
+/* Print Styles - Hide secure content when printing */
+@media print {
+    .secure-content {
+        display: none !important;
+    }
+    
+    .security-watermark {
+        display: none !important;
+    }
+    
+    body::before {
+        content: "ENCRYPTED CONTENT CANNOT BE PRINTED";
+        display: block;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        color: #f5576c;
+        padding: 50px;
+        border: 5px solid #f5576c;
+        margin: 50px;
+    }
+}
+
+/* Screen Recording Overlay */
+.recording-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    text-align: center;
+    padding: 40px;
+}
+
+.recording-overlay i {
+    font-size: 80px;
+    margin-bottom: 30px;
+    color: #f5576c;
+}
+
+.recording-overlay h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.recording-overlay p {
+    font-size: 18px;
+    max-width: 600px;
+    line-height: 1.6;
+    opacity: 0.9;
+}
+
+/* Security Level Indicator */
+.security-level {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.security-level.level-1 {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+}
+
+.security-level.level-2 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.security-level.level-3 {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.security-level.level-4 {
+    background: linear-gradient(135deg, #ffa751 0%, #ffe259 100%);
+    color: #333;
+}
+
+/* Secure Email View Header */
+.secure-email-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px 10px 0 0;
+    margin: -20px -20px 20px -20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.secure-email-header .header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.secure-email-header .shield-icon {
+    font-size: 32px;
+}
+
+.secure-email-header .header-info h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.secure-email-header .header-info p {
+    margin: 5px 0 0 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Security Features List */
+.security-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.security-feature {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+    display: flex;
+    align-items: start;
+    gap: 12px;
+}
+
+.security-feature i {
+    font-size: 24px;
+    color: #667eea;
+    flex-shrink: 0;
+}
+
+.security-feature .feature-content h5 {
+    margin: 0 0 5px 0;
+    font-size: 15px;
+    color: #333;
+}
+
+.security-feature .feature-content p {
+    margin: 0;
+    font-size: 13px;
+    color: #666;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .security-feature {
+        background: #2d3748;
+        border-left-color: #764ba2;
+    }
+    
+    .security-feature i {
+        color: #764ba2;
+    }
+    
+    .security-feature .feature-content h5 {
+        color: #e2e8f0;
+    }
+    
+    .security-feature .feature-content p {
+        color: #a0aec0;
+    }
+}
+
+/* Forensic Tracking Indicator */
+.forensic-indicator {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(102, 126, 234, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 9998;
+    backdrop-filter: blur(10px);
+}
+
+.forensic-indicator i {
+    font-size: 12px;
+}
+
+.forensic-indicator .pulse {
+    width: 8px;
+    height: 8px;
+    background: #38ef7d;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+}
+
+/* Session Timeout Warning */
+.session-warning {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #ffa751 0%, #ffe259 100%);
+    color: #333;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(255, 167, 81, 0.4);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 350px;
+}
+
+.session-warning i {
+    font-size: 24px;
+    color: #f5576c;
+}
+
+.session-warning .warning-content {
+    flex: 1;
+}
+
+.session-warning .warning-title {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.session-warning .warning-text {
+    font-size: 13px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .security-toast {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .security-features {
+        grid-template-columns: 1fr;
+    }
+    
+    .secure-email-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}

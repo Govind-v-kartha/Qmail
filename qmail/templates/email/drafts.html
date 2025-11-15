@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Drafts - QMail{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2><i class="fas fa-file-alt"></i> Drafts</h2>
+                <a href="{{ url_for('email.compose') }}" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> New Draft
+                </a>
+            </div>
+            
+            {% if drafts.items %}
+            <div class="card">
+                <div class="list-group list-group-flush">
+                    {% for draft in drafts.items %}
+                    <div class="list-group-item email-draft-item">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-file-alt text-warning"></i>
+                                    {{ draft.subject or '(No Subject)' }}
+                                </h6>
+                                <p class="mb-1">
+                                    <small class="text-muted">
+                                        To: {{ draft.to_addr or '(No recipient)' }}
+                                    </small>
+                                </p>
+                                {% if draft.body %}
+                                <div class="draft-preview mt-2">
+                                    <small class="text-muted">
+                                        {{ draft.body[:150] }}{% if draft.body|length > 150 %}...{% endif %}
+                                    </small>
+                                </div>
+                                {% endif %}
+                                {% if draft.attachments.count() > 0 %}
+                                <small class="text-muted">
+                                    <i class="fas fa-paperclip"></i> {{ draft.attachments.count() }} attachment(s)
+                                </small>
+                                {% endif %}
+                            </div>
+                            <div class="text-end ms-3">
+                                <small class="text-muted d-block mb-2">
+                                    {% if draft.created_at %}
+                                    {{ draft.created_at.strftime('%Y-%m-%d') }}<br>
+                                    {{ draft.created_at.strftime('%H:%M') }}
+                                    {% endif %}
+                                </small>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ url_for('email.compose', draft_id=draft.id) }}" 
+                                       class="btn btn-outline-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{{ url_for('email.delete_draft', draft_id=draft.id) }}" 
+                                       class="btn btn-outline-danger" 
+                                       onclick="return confirm('Delete this draft?')"
+                                       title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Pagination -->
+            {% if drafts.has_prev or drafts.has_next %}
+            <nav class="mt-3">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if not drafts.has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('email.drafts', page=drafts.prev_num) }}">Previous</a>
+                    </li>
+                    
+                    {% for page_num in drafts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == drafts.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('email.drafts', page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <li class="page-item {% if not drafts.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('email.drafts', page=drafts.next_num) }}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+            
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> You don't have any drafts.
+                <a href="{{ url_for('email.compose') }}">Start composing</a> to save drafts automatically.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.email-draft-item {
+    padding: 15px;
+    transition: background-color 0.2s;
+}
+
+.email-draft-item:hover {
+    background-color: #f8f9fa;
+}
+
+.draft-preview {
+    max-height: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-left: 3px solid #ffc107;
+    padding-left: 10px;
+    margin-top: 8px;
+}
+</style>
+
+{% endblock %}

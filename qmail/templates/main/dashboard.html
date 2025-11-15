@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - QMail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+    <p class="text-muted">Welcome back, {{ current_user.username }}!</p>
+    
+    <hr>
+    
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-inbox"></i> Inbox</h5>
+                    <h2 class="mb-0">{{ stats.inbox_count }}</h2>
+                    <small>unread messages</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-paper-plane"></i> Sent</h5>
+                    <h2 class="mb-0">{{ stats.sent_count }}</h2>
+                    <small>sent messages</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-shield-alt"></i> Encrypted</h5>
+                    <h2 class="mb-0">{{ stats.encrypted_count }}</h2>
+                    <small>quantum-secured</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-address-book"></i> Contacts</h5>
+                    <h2 class="mb-0">{{ stats.contact_count }}</h2>
+                    <small>saved contacts</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('email.compose') }}" class="btn btn-primary me-2">
+                        <i class="fas fa-edit"></i> Compose New Email
+                    </a>
+                    <a href="{{ url_for('email.inbox') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-inbox"></i> View Inbox
+                    </a>
+                    <a href="{{ url_for('email.sync') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-sync"></i> Sync Emails
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Emails -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Recent Emails</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_emails %}
+                    <div class="list-group">
+                        {% for email in recent_emails %}
+                        <a href="{{ url_for('email.view', email_id=email.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">
+                                    {% if email.is_encrypted %}
+                                    <i class="fas fa-lock text-warning"></i>
+                                    {% endif %}
+                                    {{ email.subject or '(No Subject)' }}
+                                </h6>
+                                <small class="text-muted">
+                                    {% if email.received_at %}
+                                    {{ email.received_at.strftime('%Y-%m-%d %H:%M') }}
+                                    {% elif email.sent_at %}
+                                    {{ email.sent_at.strftime('%Y-%m-%d %H:%M') }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <p class="mb-1">
+                                <small>From: {{ email.from_addr }}</small>
+                            </p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No recent emails</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

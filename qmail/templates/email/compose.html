@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}Compose Email - QMail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>
+        <i class="fas fa-edit"></i> 
+        {% if draft %}Edit Draft{% else %}Compose New Email{% endif %}
+    </h2>
+    {% if draft %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> Editing draft saved on {{ draft.created_at.strftime('%Y-%m-%d %H:%M') }}
+    </div>
+    {% endif %}
+    <hr>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <form method="POST" action="{{ url_for('email.compose', draft_id=draft.id if draft else none) }}" enctype="multipart/form-data" id="compose-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                {% if draft %}
+                <input type="hidden" name="draft_id" value="{{ draft.id }}">
+                {% endif %}
+                
+                <div class="mb-3">
+                    <label for="to" class="form-label">To</label>
+                    <input type="text" class="form-control" id="to" name="to" 
+                           value="{{ draft.to_addr if draft else '' }}"
+                           placeholder="recipient@example.com" {% if not draft %}required{% endif %}>
+                    <div class="form-text">Separate multiple addresses with commas</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="cc" class="form-label">CC (Optional)</label>
+                    <input type="text" class="form-control" id="cc" name="cc" 
+                           value="{{ draft.cc_addr if draft else '' }}"
+                           placeholder="cc@example.com">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="subject" class="form-label">Subject</label>
+                    <input type="text" class="form-control" id="subject" name="subject" 
+                           value="{{ draft.subject if draft else '' }}"
+                           placeholder="Email subject" {% if not draft %}required{% endif %}>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="security_level" class="form-label">Security Level</label>
+                    <select class="form-select" id="security_level" name="security_level" required>
+                        <option value="1">Level 1: Quantum OTP (Perfect Secrecy) - Best for short messages</option>
+                        <option value="2" selected>Level 2: Quantum-Aided AES (Recommended) ⭐</option>
+                        <option value="3">Level 3: Post-Quantum Cryptography</option>
+                        <option value="4">Level 4: Classical Encryption</option>
+                    </select>
+                    <div class="form-text">Choose encryption strength for this message and attachments</div>
+                    <div class="alert alert-warning mt-2" id="otp-attachment-warning" style="display:none;">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <strong>Warning:</strong> OTP encryption with file attachments may have size limitations.
+                        We recommend using <strong>Quantum-Aided AES</strong> for reliable attachment encryption.
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="body" class="form-label">Message</label>
+                    <textarea class="form-control" id="body" name="body" rows="12" 
+                              placeholder="Type your message here..." {% if not draft %}required{% endif %}>{{ draft.body if draft else '' }}</textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="attachments" class="form-label">
+                        <i class="fas fa-paperclip"></i> Attachments (Optional)
+                    </label>
+                    <input type="file" class="form-control" id="attachments" name="attachments" multiple>
+                    <div class="form-text">
+                        Max 25 MB per file. Allowed: Images, Documents, PDFs, Archives
+                    </div>
+                    <div id="attachment-list" class="mt-2"></div>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <button type="submit" name="action" value="send" class="btn btn-primary btn-lg">
+                            <i class="fas fa-lock"></i> Send Encrypted
+                        </button>
+                        <button type="submit" name="action" value="draft" class="btn btn-outline-warning btn-lg">
+                            <i class="fas fa-save"></i> Save as Draft
+                        </button>
+                    </div>
+                    <a href="{{ url_for('email.inbox') }}" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                </div>
+                
+                <!-- Auto-save indicator -->
+                <div class="mt-3">
+                    <small id="autosave-status" class="text-muted">
+                        <i class="fas fa-circle text-secondary"></i> Auto-save disabled
+                    </small>
+                </div>
+            </form>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-address-book"></i> Contacts</h6>
+                </div>
+                <div class="card-body">
+                    {% if contacts %}
+                    <div class="list-group list-group-flush">
+                        {% for contact in contacts %}
+                        <button type="button" class="list-group-item list-group-item-action text-start contact-item" 
+                                data-email="{{ contact.email }}">
+                            <strong>{{ contact.name }}</strong><br>
+                            <small class="text-muted">{{ contact.email }}</small>
+                            {% if contact.has_qkd %}
+                            <br><small class="text-success"><i class="fas fa-check-circle"></i> QKD Enabled</small>
+                            {% endif %}
+                        </button>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No contacts yet</p>
+                    <a href="{{ url_for('email.add_contact') }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> Add Contact
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header bg-warning">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Security Info</h6>
+                </div>
+                <div class="card-body">
+                    <small>
+                        <strong>Your message will be encrypted using Quantum Key Distribution.</strong>
+                        <ul class="mt-2">
+                            <li>Keys are generated by quantum mechanics</li>
+                            <li>Any eavesdropping is detectable</li>
+                            <li>Future-proof against quantum computers</li>
+                        </ul>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add contact email to recipient field when clicked
+document.querySelectorAll('.contact-item').forEach(item => {
+    item.addEventListener('click', function() {
+        const email = this.getAttribute('data-email');
+        const toField = document.getElementById('to');
+        if (toField.value) {
+            toField.value += ', ' + email;
+        } else {
+            toField.value = email;
+        }
+    });
+});
+
+// Handle file attachment preview
+const attachmentInput = document.getElementById('attachments');
+const attachmentList = document.getElementById('attachment-list');
+const securityLevelSelect = document.getElementById('security_level');
+const otpWarning = document.getElementById('otp-attachment-warning');
+
+// Function to check and show OTP warning
+function checkOTPWarning() {
+    const hasFiles = attachmentInput.files.length > 0;
+    const isOTP = securityLevelSelect.value === '1';
+    
+    if (hasFiles && isOTP) {
+        otpWarning.style.display = 'block';
+    } else {
+        otpWarning.style.display = 'none';
+    }
+}
+
+// Listen for security level changes
+securityLevelSelect.addEventListener('change', checkOTPWarning);
+
+attachmentInput.addEventListener('change', function(e) {
+    attachmentList.innerHTML = '';
+    
+    const files = Array.from(this.files);
+    if (files.length === 0) {
+        checkOTPWarning();
+        return;
+    }
+    
+    // Check OTP warning after files selected
+    checkOTPWarning();
+    
+    let totalSize = 0;
+    files.forEach(file => {
+        totalSize += file.size;
+        
+        const fileItem = document.createElement('div');
+        fileItem.className = 'alert alert-info alert-dismissible fade show py-2';
+        fileItem.innerHTML = `
+            <i class="fas fa-file"></i> <strong>${file.name}</strong>
+            <small>(${formatFileSize(file.size)})</small>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        attachmentList.appendChild(fileItem);
+    });
+    
+    // Show total size
+    if (files.length > 1) {
+        const totalItem = document.createElement('div');
+        totalItem.className = 'text-muted small';
+        totalItem.textContent = `Total: ${files.length} file(s), ${formatFileSize(totalSize)}`;
+        attachmentList.appendChild(totalItem);
+    }
+    
+    // Warn if too large
+    if (totalSize > 25 * 1024 * 1024) {
+        const warning = document.createElement('div');
+        warning.className = 'alert alert-warning py-2';
+        warning.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Total size exceeds 25 MB limit!';
+        attachmentList.appendChild(warning);
+    }
+});
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// Auto-save draft functionality
+let autosaveTimeout;
+let isDirty = false;
+const autosaveStatus = document.getElementById('autosave-status');
+const form = document.getElementById('compose-form');
+
+// Track changes
+['to', 'cc', 'subject', 'body'].forEach(fieldId => {
+    const field = document.getElementById(fieldId);
+    if (field) {
+        field.addEventListener('input', function() {
+            isDirty = true;
+            scheduleAutosave();
+        });
+    }
+});
+
+function scheduleAutosave() {
+    clearTimeout(autosaveTimeout);
+    updateStatus('pending');
+    
+    // Auto-save after 3 seconds of inactivity
+    autosaveTimeout = setTimeout(function() {
+        if (isDirty) {
+            autosaveDraft();
+        }
+    }, 3000);
+}
+
+function autosaveDraft() {
+    const formData = new FormData(form);
+    formData.set('action', 'autosave');
+    
+    // Add CSRF token to autosave request
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+    formData.set('csrf_token', csrfToken);
+    
+    updateStatus('saving');
+    
+    fetch('{{ url_for("email.save_draft") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            isDirty = false;
+            updateStatus('saved');
+            
+            // Update draft_id if this is a new draft
+            if (data.draft_id && !document.querySelector('input[name="draft_id"]')) {
+                const draftIdInput = document.createElement('input');
+                draftIdInput.type = 'hidden';
+                draftIdInput.name = 'draft_id';
+                draftIdInput.value = data.draft_id;
+                form.appendChild(draftIdInput);
+            }
+        } else {
+            updateStatus('error');
+        }
+    })
+    .catch(error => {
+        console.error('Auto-save error:', error);
+        updateStatus('error');
+    });
+}
+
+function updateStatus(state) {
+    const icon = autosaveStatus.querySelector('i');
+    const text = autosaveStatus.childNodes[autosaveStatus.childNodes.length - 1];
+    
+    switch(state) {
+        case 'pending':
+            icon.className = 'fas fa-circle text-warning';
+            text.textContent = ' Pending changes...';
+            break;
+        case 'saving':
+            icon.className = 'fas fa-spinner fa-spin text-primary';
+            text.textContent = ' Saving draft...';
+            break;
+        case 'saved':
+            icon.className = 'fas fa-check-circle text-success';
+            text.textContent = ' Draft saved';
+            setTimeout(() => {
+                icon.className = 'fas fa-circle text-secondary';
+                text.textContent = ' Auto-save enabled';
+            }, 2000);
+            break;
+        case 'error':
+            icon.className = 'fas fa-exclamation-circle text-danger';
+            text.textContent = ' Auto-save failed';
+            setTimeout(() => {
+                icon.className = 'fas fa-circle text-secondary';
+                text.textContent = ' Auto-save enabled';
+            }, 3000);
+            break;
+    }
+}
+
+// Enable auto-save indicator
+autosaveStatus.innerHTML = '<i class="fas fa-circle text-secondary"></i> Auto-save enabled';
+</script>
+{% endblock %}

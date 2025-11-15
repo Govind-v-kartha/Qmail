@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - QMail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-cog"></i> Settings</h2>
+    <hr>
+    
+    <form method="POST" action="{{ url_for('main.settings') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="row">
+            <!-- SMTP Settings -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-paper-plane"></i> SMTP Settings (Outgoing)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="smtp_server" class="form-label">SMTP Server</label>
+                            <input type="text" class="form-control" id="smtp_server" name="smtp_server" 
+                                   value="{{ current_user.smtp_server or 'smtp.gmail.com' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="smtp_port" class="form-label">SMTP Port</label>
+                            <input type="number" class="form-control" id="smtp_port" name="smtp_port" 
+                                   value="{{ current_user.smtp_port or 587 }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="smtp_username" class="form-label">SMTP Username</label>
+                            <input type="text" class="form-control" id="smtp_username" name="smtp_username" 
+                                   value="{{ current_user.smtp_username or current_user.email }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="smtp_password" class="form-label">SMTP Password</label>
+                            <input type="password" class="form-control" id="smtp_password" name="smtp_password" 
+                                   placeholder="Leave blank to keep current">
+                            <div class="form-text">For Gmail, use App Password</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- IMAP Settings -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-inbox"></i> IMAP Settings (Incoming)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="imap_server" class="form-label">IMAP Server</label>
+                            <input type="text" class="form-control" id="imap_server" name="imap_server" 
+                                   value="{{ current_user.imap_server or 'imap.gmail.com' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="imap_port" class="form-label">IMAP Port</label>
+                            <input type="number" class="form-control" id="imap_port" name="imap_port" 
+                                   value="{{ current_user.imap_port or 993 }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="imap_username" class="form-label">IMAP Username</label>
+                            <input type="text" class="form-control" id="imap_username" name="imap_username" 
+                                   value="{{ current_user.imap_username or current_user.email }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="imap_password" class="form-label">IMAP Password</label>
+                            <input type="password" class="form-control" id="imap_password" name="imap_password" 
+                                   placeholder="Leave blank to keep current">
+                            <div class="form-text">For Gmail, use App Password</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Security Settings -->
+        <div class="card mb-4">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Quantum Security Settings</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="default_security_level" class="form-label">Default Security Level</label>
+                            <select class="form-select" id="default_security_level" name="default_security_level">
+                                <option value="1" {% if current_user.default_security_level == 1 %}selected{% endif %}>
+                                    Level 1: Quantum OTP (Perfect Secrecy)
+                                </option>
+                                <option value="2" {% if current_user.default_security_level == 2 %}selected{% endif %}>
+                                    Level 2: Quantum-Aided AES (Recommended)
+                                </option>
+                                <option value="3" {% if current_user.default_security_level == 3 %}selected{% endif %}>
+                                    Level 3: Post-Quantum Cryptography
+                                </option>
+                                <option value="4" {% if current_user.default_security_level == 4 %}selected{% endif %}>
+                                    Level 4: Classical Encryption
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Display Settings -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-palette"></i> Display Settings</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="emails_per_page" class="form-label">Emails Per Page</label>
+                            <input type="number" class="form-control" id="emails_per_page" name="emails_per_page" 
+                                   value="{{ settings.emails_per_page or 20 }}">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="theme" class="form-label">Theme</label>
+                            <select class="form-select" id="theme" name="theme">
+                                <option value="light" {% if settings.theme == 'light' %}selected{% endif %}>Light</option>
+                                <option value="dark" {% if settings.theme == 'dark' %}selected{% endif %}>Dark</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="auto_encrypt" name="auto_encrypt" 
+                           {% if settings.auto_encrypt %}checked{% endif %}>
+                    <label class="form-check-label" for="auto_encrypt">
+                        Automatically encrypt all outgoing emails
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

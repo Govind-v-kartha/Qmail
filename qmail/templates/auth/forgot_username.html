@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Forgot Username - QMail{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user fa-3x text-info mb-3"></i>
+                        <h1 class="h3">Forgot Username</h1>
+                        <p class="text-muted">Enter your email to retrieve your username</p>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('auth.forgot_username') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" required autofocus>
+                            <div class="form-text">We'll send you your username</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-info w-100 text-white">
+                            <i class="fas fa-paper-plane"></i> Send Username
+                        </button>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-link">
+                            <i class="fas fa-arrow-left"></i> Back to Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info mt-3">
+                <i class="fas fa-info-circle"></i>
+                <strong>Security Note:</strong> For your protection, we won't reveal whether an email is registered in our system.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

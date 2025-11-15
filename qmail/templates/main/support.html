@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Support - QMail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-life-ring"></i> Support & Help</h2>
+    <hr>
+    
+    <div class="row">
+        <!-- FAQ Section -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-question-circle"></i> Frequently Asked Questions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="faqAccordion">
+                        <!-- FAQ 1 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    How does Quantum Key Distribution (QKD) work?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    QMail uses Quantum Key Distribution to generate encryption keys based on quantum mechanics principles. 
+                                    These keys are provably secure and any eavesdropping attempt is detectable. Your emails are encrypted 
+                                    with these quantum-generated keys, providing the highest level of security.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- FAQ 2 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    What are the different security levels?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <ul>
+                                        <li><strong>Level 1 - Quantum OTP:</strong> Perfect secrecy using one-time pad. Best for short messages.</li>
+                                        <li><strong>Level 2 - Quantum-Aided AES:</strong> AES encryption with quantum-derived keys. Recommended for most use cases.</li>
+                                        <li><strong>Level 3 - Post-Quantum:</strong> Quantum-resistant algorithms for future-proof security.</li>
+                                        <li><strong>Level 4 - Classical:</strong> Standard AES-256 encryption without quantum enhancement.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- FAQ 3 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    How do I configure my email settings?
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Go to <strong>Settings</strong> from the sidebar or user menu. Enter your SMTP and IMAP server details.
+                                    For Gmail, use:
+                                    <ul>
+                                        <li>SMTP: smtp.gmail.com:587</li>
+                                        <li>IMAP: imap.gmail.com:993</li>
+                                        <li>Use an App Password instead of your regular password</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- FAQ 4 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                    How do I sync my emails?
+                                </button>
+                            </h2>
+                            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    QMail automatically syncs your emails every 5 minutes. You can also manually sync by clicking the 
+                                    <strong>"Sync Emails"</strong> button in the sidebar. New emails will appear with a notification.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- FAQ 5 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                    Can I recover deleted emails?
+                                </button>
+                            </h2>
+                            <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Yes! Deleted emails are moved to <strong>Trash</strong> where you can restore them. 
+                                    Use the "Restore" button to move them back to your inbox. Permanently deleted emails cannot be recovered.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Support -->
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-envelope"></i> Contact Support</h5>
+                </div>
+                <div class="card-body">
+                    <form id="supportForm">
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Links -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-link"></i> Quick Links</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('main.dashboard') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('main.settings') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-cog"></i> Settings
+                    </a>
+                    <a href="{{ url_for('email.contacts') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-address-book"></i> Contacts
+                    </a>
+                    <a href="{{ url_for('main.about') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-info-circle"></i> About QMail
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="fas fa-book"></i> Resources</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-file-pdf text-danger"></i>
+                            <a href="#" class="text-decoration-none">User Manual (PDF)</a>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-video text-primary"></i>
+                            <a href="#" class="text-decoration-none">Video Tutorials</a>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-shield-alt text-success"></i>
+                            <a href="#" class="text-decoration-none">Security Best Practices</a>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-code text-info"></i>
+                            <a href="#" class="text-decoration-none">API Documentation</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-body text-center">
+                    <h6>Need Immediate Help?</h6>
+                    <p class="text-muted small">Contact Team Nova</p>
+                    <a href="mailto:support@qmail.com" class="btn btn-primary btn-sm">
+                        <i class="fas fa-envelope"></i> Email Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('supportForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const subject = document.getElementById('subject').value;
+    const message = document.getElementById('message').value;
+    
+    // In production, send this to your support system
+    alert('Thank you for contacting support! We will respond within 24 hours.\n\nSubject: ' + subject);
+    
+    // Clear form
+    this.reset();
+});
+</script>
+{% endblock %}

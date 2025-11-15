@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}QMail - Quantum Secure Email{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/security.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <!-- Top Header Bar -->
+    <header class="top-header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a href="{{ url_for('main.index') }}" class="logo">
+                <i class="fas fa-atom"></i>
+                <span class="logo-text">QMail</span>
+            </a>
+        </div>
+        <div class="header-center">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search mail" class="search-input">
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-icon" id="theme-toggle-btn" title="Toggle dark mode">
+                <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+            <a href="{{ url_for('main.settings') }}" class="header-icon" title="Settings">
+                <i class="fas fa-cog"></i>
+            </a>
+            <div class="dropdown">
+                <button class="header-icon user-icon" data-bs-toggle="dropdown">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li class="dropdown-header">{{ current_user.username }}</li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ url_for('main.dashboard') }}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('main.settings') }}">
+                        <i class="fas fa-cog"></i> Settings
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="compose-btn-wrapper">
+            <a href="{{ url_for('email.compose') }}" class="compose-btn">
+                <i class="fas fa-plus"></i>
+                <span>Compose</span>
+            </a>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('email.inbox') }}" class="nav-item {% if request.endpoint == 'email.inbox' %}active{% endif %}">
+                <i class="fas fa-inbox"></i>
+                <span>Inbox</span>
+            </a>
+            <a href="{{ url_for('email.starred') }}" class="nav-item {% if request.endpoint == 'email.starred' %}active{% endif %}">
+                <i class="fas fa-star"></i>
+                <span>Starred</span>
+            </a>
+            <a href="{{ url_for('email.important') }}" class="nav-item {% if request.endpoint == 'email.important' %}active{% endif %}">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Important</span>
+            </a>
+            <a href="{{ url_for('email.sent') }}" class="nav-item {% if request.endpoint == 'email.sent' %}active{% endif %}">
+                <i class="fas fa-paper-plane"></i>
+                <span>Sent</span>
+            </a>
+            <a href="{{ url_for('email.drafts') }}" class="nav-item {% if request.endpoint == 'email.drafts' %}active{% endif %}">
+                <i class="fas fa-file-alt"></i>
+                <span>Drafts</span>
+            </a>
+            <a href="{{ url_for('email.promotional') }}" class="nav-item {% if request.endpoint == 'email.promotional' %}active{% endif %}">
+                <i class="fas fa-tag"></i>
+                <span>Promotional</span>
+            </a>
+            <a href="{{ url_for('email.spam') }}" class="nav-item {% if request.endpoint == 'email.spam' %}active{% endif %}">
+                <i class="fas fa-ban"></i>
+                <span>Spam</span>
+            </a>
+            <a href="{{ url_for('email.trash') }}" class="nav-item {% if request.endpoint == 'email.trash' %}active{% endif %}">
+                <i class="fas fa-trash"></i>
+                <span>Trash</span>
+            </a>
+            
+            <div class="nav-divider"></div>
+            
+            <a href="{{ url_for('email.contacts') }}" class="nav-item {% if request.endpoint == 'email.contacts' %}active{% endif %}">
+                <i class="fas fa-address-book"></i>
+                <span>Contacts</span>
+            </a>
+            
+            <div class="nav-divider"></div>
+            
+            <button class="nav-item sync-btn" id="sync-emails-btn" onclick="syncEmails()" title="Sync new emails">
+                <i class="fas fa-sync-alt"></i>
+                <span>Sync Emails</span>
+            </button>
+            
+            <a href="{{ url_for('main.support') }}" class="nav-item {% if request.endpoint == 'main.support' %}active{% endif %}">
+                <i class="fas fa-life-ring"></i>
+                <span>Support</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+    {% endif %}
+    
+    <!-- Flash Messages -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+    
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p class="mb-0">
+                    <i class="fas fa-shield-alt"></i> 
+                    QMail - Quantum-Secure Email Client &copy; 2025
+                </p>
+                <small>Powered by Quantum Key Distribution (QKD) | Developed by Team Nova</small>
+            </div>
+        </footer>
+    </div>
+    <!-- End Main Wrapper -->
+    
+    <!-- Inline Script - Must be before other scripts -->
+    <script>
+        // Sidebar toggle function
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainWrapper = document.querySelector('.main-wrapper');
+            
+            if (sidebar && mainWrapper) {
+                sidebar.classList.toggle('collapsed');
+                mainWrapper.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            }
+        }
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/security.js') }}"></script>
+    
+    <!-- Theme Toggle - After jQuery/Bootstrap -->
+    <script>
+        (function() {
+            console.log('Theme script loading...');
+            
+            // Restore theme immediately
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+            
+            // Wait for button to exist
+            function initThemeToggle() {
+                const btn = document.getElementById('theme-toggle-btn');
+                const icon = document.getElementById('theme-icon');
+                
+                if (!btn || !icon) {
+                    console.error('Button or icon not found!');
+                    return;
+                }
+                
+                console.log('Button found, attaching listener');
+                
+                // Update icon based on current state
+                if (document.body.classList.contains('dark-mode')) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+                
+                // Add click handler
+                btn.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log('BUTTON CLICKED!');
+                    
+                    document.body.classList.toggle('dark-mode');
+                    const isDark = document.body.classList.contains('dark-mode');
+                    
+                    console.log('Dark mode:', isDark);
+                    
+                    if (isDark) {
+                        icon.classList.remove('fa-moon');
+                        icon.classList.add('fa-sun');
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        icon.classList.remove('fa-sun');
+                        icon.classList.add('fa-moon');
+                        localStorage.setItem('theme', 'light');
+                    }
+                };
+                
+                console.log('Click handler attached');
+            }
+            
+            // Try immediately
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initThemeToggle);
+            } else {
+                initThemeToggle();
+            }
+            
+            // Also try after a short delay as backup
+            setTimeout(initThemeToggle, 100);
+            
+            // Restore sidebar state
+            setTimeout(function() {
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (isCollapsed) {
+                    const sidebar = document.getElementById('sidebar');
+                    const mainWrapper = document.querySelector('.main-wrapper');
+                    if (sidebar && mainWrapper) {
+                        sidebar.classList.add('collapsed');
+                        mainWrapper.classList.add('sidebar-collapsed');
+                    }
+                }
+            }, 50);
+        })();
+    </script>
+    
+    <!-- Email Sync Script -->
+    <script>
+        // Auto-sync emails every 5 minutes
+        let syncInterval;
+        let isSyncing = false;
+        
+        function syncEmails() {
+            if (isSyncing) {
+                console.log('Sync already in progress...');
+                return;
+            }
+            
+            isSyncing = true;
+            const syncBtn = document.getElementById('sync-emails-btn');
+            const syncIcon = syncBtn ? syncBtn.querySelector('i') : null;
+            
+            if (syncIcon) {
+                syncIcon.classList.add('fa-spin');
+            }
+            
+            console.log('Syncing emails...');
+            
+            fetch('{{ url_for("email.sync_emails") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server returned non-JSON response. Please configure your email settings.');
+                }
+                
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Sync failed');
+                    });
+                }
+                
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    console.log(`Synced ${data.new_emails} new email(s)`);
+                    
+                    // Show notification if new emails
+                    if (data.new_emails > 0) {
+                        showNotification(`${data.new_emails} new email(s) received!`, 'success');
+                        
+                        // Reload page if on inbox
+                        if (window.location.pathname.includes('/email/inbox')) {
+                            setTimeout(() => window.location.reload(), 1000);
+                        }
+                    } else {
+                        showNotification('No new emails', 'info');
+                    }
+                } else {
+                    console.error('Sync failed:', data.error);
+                    showNotification(data.error || 'Sync failed', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Sync error:', error);
+                // Sanitize error message for display
+                let errorMsg = error.message || 'Sync failed';
+                if (errorMsg.length > 100) {
+                    errorMsg = 'Sync failed. Please check your email settings.';
+                }
+                showNotification(errorMsg, 'error');
+            })
+            .finally(() => {
+                isSyncing = false;
+                if (syncIcon) {
+                    syncIcon.classList.remove('fa-spin');
+                }
+            });
+        }
+        
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show`;
+            notification.style.position = 'fixed';
+            notification.style.top = '80px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '9999';
+            notification.style.minWidth = '300px';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+        
+        // Start auto-sync if authenticated and email is configured
+        {% if current_user.is_authenticated %}
+        // Check if user has email configured
+        const hasEmailConfig = {{ 'true' if current_user.imap_server and current_user.imap_username else 'false' }};
+        
+        if (hasEmailConfig) {
+            // Initial sync after 10 seconds
+            setTimeout(syncEmails, 10000);
+            
+            // Then sync every 5 minutes
+            syncInterval = setInterval(syncEmails, 5 * 60 * 1000);
+            
+            console.log('Auto-sync enabled (every 5 minutes)');
+        } else {
+            console.log('Auto-sync disabled - email settings not configured');
+        }
+        {% endif %}
+    </script>
+    
+    <!-- User email for watermarking -->
+    {% if current_user.is_authenticated %}
+    <div data-user-email="{{ current_user.email }}" style="display: none;"></div>
+    {% endif %}
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Trash - QMail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-trash"></i> Trash
+        </h2>
+        {% if emails.items %}
+        <button class="btn btn-danger" onclick="emptyTrash()">
+            <i class="fas fa-trash-alt"></i> Empty Trash
+        </button>
+        {% endif %}
+    </div>
+    
+    {% if emails.items %}
+    <div class="card">
+        <div class="list-group list-group-flush">
+            {% for email in emails.items %}
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-2">
+                            <strong class="me-2">{{ email.from_addr }}</strong>
+                            {% if email.is_encrypted %}
+                            <span class="badge bg-warning text-dark">
+                                <i class="fas fa-lock"></i> Encrypted
+                            </span>
+                            {% endif %}
+                        </div>
+                        <h6 class="mb-1">{{ email.subject or '(No Subject)' }}</h6>
+                        <p class="mb-1 text-muted small">
+                            {{ email.body[:100] if email.body else '' }}...
+                        </p>
+                        <small class="text-muted">
+                            {% if email.received_at %}
+                            {{ email.received_at.strftime('%Y-%m-%d %H:%M') }}
+                            {% endif %}
+                        </small>
+                    </div>
+                    <div class="btn-group">
+                        <a href="{{ url_for('email.view', email_id=email.id) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <button class="btn btn-sm btn-outline-success" onclick="restoreEmail({{ email.id }})">
+                            <i class="fas fa-undo"></i> Restore
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="permanentDelete({{ email.id }})">
+                            <i class="fas fa-times"></i> Delete Forever
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if emails.pages > 1 %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if emails.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('email.trash', page=emails.prev_num) }}">Previous</a>
+            </li>
+            {% endif %}
+            
+            {% for page_num in emails.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                {% if page_num %}
+                    {% if page_num == emails.page %}
+                    <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('email.trash', page=page_num) }}">{{ page_num }}</a></li>
+                    {% endif %}
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if emails.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('email.trash', page=emails.next_num) }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> Trash is empty
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function restoreEmail(emailId) {
+    if (confirm('Restore this email to inbox?')) {
+        fetch(`/email/restore/${emailId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to restore email');
+            }
+        });
+    }
+}
+
+function permanentDelete(emailId) {
+    if (confirm('Permanently delete this email? This cannot be undone!')) {
+        fetch(`/email/permanent-delete/${emailId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to delete email');
+            }
+        });
+    }
+}
+
+function emptyTrash() {
+    if (confirm('Empty trash? All emails will be permanently deleted!')) {
+        fetch('/email/empty-trash', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to empty trash');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

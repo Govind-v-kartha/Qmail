@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}About - QMail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <h1 class="display-4">
+            <i class="fas fa-atom text-primary"></i> QMail
+        </h1>
+        <p class="lead text-muted">Quantum-Secure Email Client</p>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">About QMail</h3>
+                    <p class="card-text">
+                        QMail is an advanced email client designed to deliver <strong>quantum-secure communication</strong> 
+                        over existing email infrastructures such as Gmail, Yahoo Mail, or Outlook.
+                    </p>
+                    <p class="card-text">
+                        It combines <strong>Quantum Key Distribution (QKD)</strong> with traditional email protocols 
+                        (SMTP, IMAP, and POP3) to achieve next-generation confidentiality, integrity, and 
+                        authenticity in electronic communication.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h3 class="text-center mb-4">Security Levels</h3>
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <div class="card h-100 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Level 1: Quantum OTP</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Perfect Secrecy</strong></p>
+                    <p>Uses quantum-generated keys as one-time pads, achieving theoretically perfect secrecy. 
+                    Each key is used only once and then discarded.</p>
+                    <ul>
+                        <li>Mathematically unbreakable</li>
+                        <li>Maximum security</li>
+                        <li>Requires key as long as message</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <div class="card h-100 border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Level 2: Quantum-AES</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Hybrid Security (Recommended)</strong></p>
+                    <p>Quantum keys are used as seeds to generate AES session keys. Provides strong hybrid 
+                    security while maintaining efficiency and speed.</p>
+                    <ul>
+                        <li>Quantum-enhanced encryption</li>
+                        <li>Fast performance</li>
+                        <li>Best for daily use</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <div class="card h-100 border-warning">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Level 3: Post-Quantum</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Quantum-Resistant Algorithms</strong></p>
+                    <p>Employs post-quantum algorithms such as Kyber or Dilithium to resist quantum attacks. 
+                    Optional layer for users without access to QKD.</p>
+                    <ul>
+                        <li>Future-proof encryption</li>
+                        <li>No QKD hardware needed</li>
+                        <li>Standards-based (NIST)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <div class="card h-100 border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Level 4: Classical</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Standard Encryption</strong></p>
+                    <p>Fallback mode using standard AES or RSA encryption without quantum security features.</p>
+                    <ul>
+                        <li>Compatible with all systems</li>
+                        <li>Traditional security</li>
+                        <li>Widely supported</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-md-8 mx-auto">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h4 class="card-title"><i class="fas fa-question-circle"></i> Why Quantum Security?</h4>
+                    <p>
+                        Traditional encryption systems such as <strong>RSA</strong> and <strong>ECC</strong> 
+                        rely on computational hardness, which can be broken by powerful quantum computers 
+                        in the near future.
+                    </p>
+                    <p>
+                        <strong>Quantum Key Distribution (QKD)</strong> provides an unconditional level of 
+                        security by leveraging the laws of quantum mechanics to exchange symmetric keys 
+                        between two endpoints.
+                    </p>
+                    <blockquote class="blockquote">
+                        <p class="mb-0">
+                            <i class="fas fa-quote-left"></i>
+                            Any interception attempt during key exchange alters the quantum state, 
+                            thereby alerting both users of potential intrusion.
+                            <i class="fas fa-quote-right"></i>
+                        </p>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h3 class="text-center mb-4">Core Features</h3>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-key fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">QKD Integration</h5>
+                    <p class="card-text">
+                        Communicates with Quantum Key Manager using ETSI GS QKD 014 REST API
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-envelope fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Email Compatibility</h5>
+                    <p class="card-text">
+                        Works with existing SMTP, IMAP, and POP3 servers seamlessly
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-lock fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">App-Layer Encryption</h5>
+                    <p class="card-text">
+                        Encrypts at application layer - even the mail server can't read your messages
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8 mx-auto text-center">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h4 class="card-title">Get Started</h4>
+                    <p class="card-text">
+                        Ready to secure your communications with quantum technology?
+                    </p>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('email.compose') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-edit"></i> Send Quantum-Encrypted Email
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
