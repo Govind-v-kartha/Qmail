@@ -20,11 +20,18 @@ class Config:
     # Database
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///qmail.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # SQLAlchemy engine options - only use pool settings for non-SQLite databases
     SQLALCHEMY_ENGINE_OPTIONS = {
         'connect_args': {'timeout': 15} if 'sqlite' in SQLALCHEMY_DATABASE_URI else {},
-        'pool_size': 10 if 'sqlite' not in SQLALCHEMY_DATABASE_URI else None,
-        'pool_recycle': 3600 if 'sqlite' not in SQLALCHEMY_DATABASE_URI else None,
     }
+    
+    # Add pool settings only for PostgreSQL/MySQL
+    if 'sqlite' not in SQLALCHEMY_DATABASE_URI:
+        SQLALCHEMY_ENGINE_OPTIONS.update({
+            'pool_size': 10,
+            'pool_recycle': 3600,
+        })
     
     # Session
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=int(os.getenv('SESSION_TIMEOUT', 30)))
