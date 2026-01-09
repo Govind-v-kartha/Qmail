@@ -10,11 +10,21 @@ class Config:
     """Base configuration"""
     
     # Flask
-    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    if not SECRET_KEY:
+        # Generate a random key if not set (for development only)
+        import secrets
+        SECRET_KEY = secrets.token_hex(32)
+        print(f"WARNING: SECRET_KEY not set. Generated random key: {SECRET_KEY}")
     
     # Database
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///qmail.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'connect_args': {'timeout': 15} if 'sqlite' in SQLALCHEMY_DATABASE_URI else {},
+        'pool_size': 10 if 'sqlite' not in SQLALCHEMY_DATABASE_URI else None,
+        'pool_recycle': 3600 if 'sqlite' not in SQLALCHEMY_DATABASE_URI else None,
+    }
     
     # Session
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=int(os.getenv('SESSION_TIMEOUT', 30)))

@@ -7,7 +7,6 @@ import logging
 from flask import Flask
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
-from flask_talisman import Talisman
 from dotenv import load_dotenv
 
 from qmail.models.database import db, User
@@ -82,12 +81,41 @@ def create_app(config_name=None):
     )
     
     # Register blueprints
-    from qmail.core.routes import auth, main, email_routes, api
+    try:
+        from qmail.core.routes import auth, main, email_routes, api
+        
+        app.register_blueprint(auth.bp)
+        app.register_blueprint(main.bp)
+        app.register_blueprint(email_routes.bp)
+        app.register_blueprint(api.bp)
+    except ImportError as e:
+        app.logger.warning(f"Could not import all blueprints: {e}")
     
-    app.register_blueprint(auth.bp)
-    app.register_blueprint(main.bp)
-    app.register_blueprint(email_routes.bp)
-    app.register_blueprint(api.bp)
+    # Add health check endpoint
+    @app.route('/health', methods=['GET'])
+    def health_check():
+        """Health check endpoint for Vercel"""
+        return {'status': 'healthy', 'message': 'QMail server is running'}, 200
+    
+    # Error handlers
+    @app.errorhandler(500)
+    def internal_error(error):
+        """Handle internal server errors"""
+        app.logger.error(f'Server Error: {error}')
+        return {
+            'error': 'Internal Server Error',
+            'message': str(error),
+            'status': 500
+        }, 500
+    
+    @app.errorhandler(404)
+    def not_found(error):
+        """Handle 404 errors"""
+        return {
+            'error': 'Not Found',
+            'message': 'The requested resource was not found',
+            'status': 404
+        }, 404
     
     # Create database tables
     with app.app_context():

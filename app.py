@@ -5,6 +5,7 @@ Optimized for serverless environment
 
 import os
 import sys
+import logging
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -14,23 +15,36 @@ load_dotenv()
 if os.getenv('VERCEL'):
     os.environ['FLASK_ENV'] = 'production'
 
+# Configure logging early
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+logger.info("Starting QMail Flask app initialization...")
+
 try:
-    # Import and create the Flask app
+    logger.info("Importing Flask app factory...")
     from qmail.app import create_app
     
-    # Create the Flask application instance
+    logger.info("Creating Flask application instance...")
     app = create_app()
     
-    # Ensure database is initialized on startup
+    logger.info("Initializing database...")
     with app.app_context():
         from qmail.models.database import db
         # Create tables if they don't exist
         db.create_all()
+        logger.info("Database tables created successfully")
+    
+    logger.info("Flask app initialized successfully!")
         
 except Exception as e:
-    print(f"ERROR: Failed to initialize Flask app: {str(e)}", file=sys.stderr)
+    logger.error(f"FATAL ERROR: Failed to initialize Flask app: {str(e)}")
     import traceback
-    traceback.print_exc()
+    logger.error(traceback.format_exc())
+    print(f"ERROR: Failed to initialize Flask app: {str(e)}", file=sys.stderr)
     raise
 
 if __name__ == '__main__':
