@@ -1,18 +1,37 @@
 """
 Flask app entrypoint for Vercel deployment
+Optimized for serverless environment
 """
 
 import os
+import sys
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-# Import and create the Flask app
-from qmail.app import create_app
+# Set environment for Vercel
+if os.getenv('VERCEL'):
+    os.environ['FLASK_ENV'] = 'production'
 
-# Create the Flask application instance
-app = create_app()
+try:
+    # Import and create the Flask app
+    from qmail.app import create_app
+    
+    # Create the Flask application instance
+    app = create_app()
+    
+    # Ensure database is initialized on startup
+    with app.app_context():
+        from qmail.models.database import db
+        # Create tables if they don't exist
+        db.create_all()
+        
+except Exception as e:
+    print(f"ERROR: Failed to initialize Flask app: {str(e)}", file=sys.stderr)
+    import traceback
+    traceback.print_exc()
+    raise
 
 if __name__ == '__main__':
     # Get configuration from environment

@@ -1,0 +1,32 @@
+# QMail - Quantum-Secure Email Client Dependencies (Vercel Optimized)
+
+# Web Framework
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Flask-WTF==1.2.1
+WTForms==3.1.1
+
+# Cryptography
+cryptography==41.0.7
+pycryptodome==3.19.0
+
+# HTTP Client for QKD API
+requests==2.31.0
+
+# Database
+SQLAlchemy==2.0.45
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# WSGI Server
+gunicorn==21.2.0
+
+# Utilities
+python-dateutil==2.8.2
+pytz==2023.3
+
+# HTML Sanitization (using pure Python)
+bleach==6.1.0
+beautifulsoup4==4.12.2

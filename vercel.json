@@ -1,8 +1,13 @@
 {
+  "buildCommand": "pip install --prefer-binary -r requirements.txt",
   "builds": [
     {
       "src": "app.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb",
+        "runtime": "python3.11"
+      }
     }
   ],
   "routes": [
@@ -13,6 +18,10 @@
   ],
   "env": {
     "FLASK_APP": "app.py",
-    "FLASK_ENV": "production"
-  }
+    "FLASK_ENV": "production",
+    "PYTHONUNBUFFERED": "1"
+  },
+  "regions": ["iad1"]
 }
+
+
