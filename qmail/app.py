@@ -70,14 +70,21 @@ def create_app(config_name=None):
     def load_user(user_id):
         return User.query.get(int(user_id))
     
-    # Configure logging
+    # Configure logging - only use StreamHandler for Vercel (read-only file system)
+    log_handlers = [logging.StreamHandler()]
+    
+    # Only add FileHandler in development mode
+    if os.getenv('FLASK_ENV', 'development') == 'development':
+        try:
+            log_handlers.insert(0, logging.FileHandler(app.config['LOG_FILE']))
+        except (OSError, IOError):
+            # If file write fails (e.g., read-only filesystem), just use console
+            pass
+    
     logging.basicConfig(
         level=getattr(logging, app.config['LOG_LEVEL']),
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler(app.config['LOG_FILE']),
-            logging.StreamHandler()
-        ]
+        handlers=log_handlers
     )
     
     # Register blueprints
