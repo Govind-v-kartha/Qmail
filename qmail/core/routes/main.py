@@ -12,9 +12,12 @@ bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
-    """Home page"""
-    if current_user.is_authenticated:
-        return redirect(url_for('email.inbox'))
+    """Landing page - always the login page for every visitor.
+
+    Authenticated users can still access the inbox directly at /email/inbox
+    (e.g. via the post-login redirect or a bookmark), but the landing URL
+    is always the login screen so first-time visitors see it on arrival.
+    """
     return redirect(url_for('auth.login'))
 
 

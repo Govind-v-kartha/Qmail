@@ -15,10 +15,11 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Login page with account lockout protection"""
-    if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
-    
+    """Login page with account lockout protection.
+
+    The login page is the public landing page, so always render it on GET
+    even when the user is already authenticated.
+    """
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -60,12 +61,13 @@ def login():
         db.session.commit()
         
         login_user(user, remember=remember)
-        
-        # Redirect to next page or index
+
+        # Redirect to ?next=, otherwise straight to the inbox.
+        # Avoid bouncing back to the landing page (which is the login page).
         next_page = request.args.get('next')
         if not next_page or urlparse(next_page).netloc != '':
-            next_page = url_for('main.index')
-        
+            next_page = url_for('email.inbox')
+
         flash(f'Welcome back, {user.username}!', 'success')
         return redirect(next_page)
     
