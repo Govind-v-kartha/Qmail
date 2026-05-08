@@ -16,9 +16,13 @@ class Config:
         import secrets
         SECRET_KEY = secrets.token_hex(32)
         print(f"WARNING: SECRET_KEY not set. Generated random key: {SECRET_KEY}")
-    
-    # Database
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///qmail.db')
+
+    # Database. On Vercel the project filesystem is read-only, but /tmp is
+    # writable for the lifetime of a single warm Lambda. We default to a
+    # SQLite file there so the app behaves like local without requiring an
+    # external Postgres. Set DATABASE_URL to override (recommended for prod).
+    _default_sqlite = 'sqlite:////tmp/qmail.db' if os.getenv('VERCEL') else 'sqlite:///qmail.db'
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', _default_sqlite)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # SQLAlchemy engine options - only use pool settings for non-SQLite databases
