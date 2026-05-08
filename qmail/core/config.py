@@ -60,6 +60,11 @@ class Config:
     # Security
     WTF_CSRF_ENABLED = True
     WTF_CSRF_TIME_LIMIT = None
+    # Some upstream proxies (Vercel) strip the Referer header from same-origin
+    # POSTs, which makes Flask-WTF reject the request with "The referrer
+    # header is missing.". The CSRF token itself still protects the request,
+    # so disable the strict referrer check.
+    WTF_CSRF_SSL_STRICT = False
     
     # Upload
     MAX_CONTENT_LENGTH = int(os.getenv('MAX_EMAIL_SIZE', 25)) * 1024 * 1024  # MB
