@@ -12,10 +12,27 @@ class Config:
     # Flask
     SECRET_KEY = os.getenv('SECRET_KEY')
     if not SECRET_KEY:
-        # Generate a random key if not set (for development only)
+        # On Vercel, multiple Lambda containers can serve different requests
+        # for the same deployment; if each generates its own random key, CSRF
+        # tokens issued by container A fail when validated by container B.
+        # Derive a stable key from per-deployment env vars Vercel provides
+        # automatically so all containers of the same deployment agree.
+        # (Set the SECRET_KEY env var explicitly for production hardening.)
+        import hashlib
         import secrets
-        SECRET_KEY = secrets.token_hex(32)
-        print(f"WARNING: SECRET_KEY not set. Generated random key: {SECRET_KEY}")
+
+        deployment_seed = (
+            os.getenv('VERCEL_GIT_COMMIT_SHA')
+            or os.getenv('VERCEL_DEPLOYMENT_ID')
+            or os.getenv('VERCEL_URL')
+        )
+        if deployment_seed:
+            SECRET_KEY = hashlib.sha256(
+                f'qmail-secret::{deployment_seed}'.encode()
+            ).hexdigest()
+        else:
+            SECRET_KEY = secrets.token_hex(32)
+            print(f"WARNING: SECRET_KEY not set. Generated random key: {SECRET_KEY}")
 
     # Database. On Vercel the project filesystem is read-only, but /tmp is
     # writable for the lifetime of a single warm Lambda. We default to a
