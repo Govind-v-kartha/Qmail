@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 import os
 from io import BytesIO
 
-from qmail.models.database import db, Email, Contact, EmailAttachment
+from qmail.models.database import db, Email, Contact, EmailAttachment, utcnow
 from qmail.email_handler.email_manager import EmailManager
 from qmail.email_handler.attachment_handler import AttachmentHandler, is_allowed_file, format_file_size
 from qmail.crypto.encryption_engine import SecurityLevel
@@ -371,7 +371,7 @@ def compose():
                     security_level=security_level,
                     security_level_name=SecurityLevel(security_level).name,
                     is_sent=True,
-                    sent_at=datetime.utcnow()
+                    sent_at=utcnow()
                 )
                 db.session.add(email)
                 db.session.flush()  # Get email ID
@@ -685,7 +685,7 @@ def sync():
                     is_encrypted=email_data.get('is_encrypted', False),
                     security_level=int(email_data.get('qkd_security_level', 0)) if email_data.get('qkd_security_level') else None,
                     qkd_key_id=email_data.get('qkd_key_id', ''),
-                    received_at=datetime.utcnow(),
+                    received_at=utcnow(),
                     folder='spam' if is_spam else 'inbox',
                     is_spam=is_spam,
                     category=category if category != 'primary' else None
@@ -994,7 +994,7 @@ def mark_spam(email_id):
                 if existing_pattern:
                     existing_pattern.match_count += 1
                     existing_pattern.correct_count += 1
-                    existing_pattern.updated_at = datetime.utcnow()
+                    existing_pattern.updated_at = utcnow()
                 else:
                     new_pattern = SpamPattern(
                         user_id=current_user.id,

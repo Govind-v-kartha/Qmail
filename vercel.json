@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pip install --prefer-binary -r requirements.txt",
+  "buildCommand": "pip install --prefer-binary -r requirements-vercel.txt",
   "builds": [
     {
       "src": "app.py",

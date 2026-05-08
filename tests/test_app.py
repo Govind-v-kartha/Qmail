@@ -64,18 +64,23 @@ class TestAuthentication:
             'username': 'testuser',
             'password': 'wrongpassword'
         }, follow_redirects=True)
-        
-        assert b'Invalid username or password' in response.data
-    
+
+        # Auth message can be either "Invalid username or password" (unknown user)
+        # or "Invalid password. N attempts remaining." (known user, wrong pw).
+        assert (
+            b'Invalid username or password' in response.data
+            or b'Invalid password' in response.data
+        )
+
     def test_register_new_user(self, client):
-        """Test user registration"""
+        """Test user registration with strong password"""
         response = client.post('/auth/register', data={
             'username': 'newuser',
             'email': 'newuser@example.com',
-            'password': 'newpass123',
-            'password_confirm': 'newpass123'
+            'password': 'NewPass123!',
+            'password_confirm': 'NewPass123!'
         }, follow_redirects=True)
-        
+
         assert response.status_code == 200
         assert b'Registration successful' in response.data
 

@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 from datetime import datetime
 import re
 
-from qmail.models.database import db, User, Settings
+from qmail.models.database import db, User, Settings, utcnow
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -33,7 +33,7 @@ def login():
         
         # Check if account is locked
         if user.is_account_locked():
-            minutes_left = int((user.account_locked_until - datetime.utcnow()).total_seconds() / 60)
+            minutes_left = int((user.account_locked_until - utcnow()).total_seconds() / 60)
             flash(f'Account locked due to multiple failed login attempts. Try again in {minutes_left} minutes.', 'error')
             return redirect(url_for('auth.login'))
         
@@ -56,7 +56,7 @@ def login():
         
         # Successful login
         user.reset_failed_logins()
-        user.last_login = datetime.utcnow()
+        user.last_login = utcnow()
         db.session.commit()
         
         login_user(user, remember=remember)

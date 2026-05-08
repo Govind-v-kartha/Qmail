@@ -42,24 +42,7 @@ def create_app(config_name=None):
     
     # Initialize CSRF protection
     csrf.init_app(app)
-    
-    # Initialize security headers (disabled HTTPS for development)
-    # TEMPORARILY DISABLED TALISMAN FOR DEBUGGING
-    # csp = {
-    #     'default-src': "'self'",
-    #     'script-src': ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"],
-    #     'style-src': ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"],
-    #     'img-src': ["'self'", "data:", "https:"],
-    #     'font-src': ["'self'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"],
-    # }
-    
-    # Talisman(app,
-    #     force_https=False,  # Set to True in production
-    #     strict_transport_security=False,  # Set to True in production
-    #     content_security_policy=csp,
-    #     content_security_policy_nonce_in=['script-src']
-    # )
-    
+
     # Initialize Flask-Login
     login_manager = LoginManager()
     login_manager.init_app(app)
@@ -68,7 +51,7 @@ def create_app(config_name=None):
     
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        return db.session.get(User, int(user_id))
     
     # Configure logging - only use StreamHandler for Vercel (read-only file system)
     log_handlers = [logging.StreamHandler()]
@@ -124,11 +107,50 @@ def create_app(config_name=None):
             'status': 404
         }, 404
     
-    # Create database tables
+    # Create database tables and seed default admin user
     with app.app_context():
         db.create_all()
-    
+        _ensure_default_admin(app)
+
     return app
+
+
+def _ensure_default_admin(app):
+    """Create a default admin account on first boot.
+
+    Username / password / email are configurable via env vars:
+      DEFAULT_ADMIN_USERNAME (default: 'admin')
+      DEFAULT_ADMIN_PASSWORD (default: 'admin')
+      DEFAULT_ADMIN_EMAIL    (default: 'admin@qmail.local')
+
+    Set DEFAULT_ADMIN_DISABLE=true in production to skip seeding entirely.
+    """
+    if os.getenv('DEFAULT_ADMIN_DISABLE', 'false').lower() == 'true':
+        return
+
+    username = os.getenv('DEFAULT_ADMIN_USERNAME', 'admin')
+    password = os.getenv('DEFAULT_ADMIN_PASSWORD', 'admin')
+    email = os.getenv('DEFAULT_ADMIN_EMAIL', 'admin@qmail.local')
+
+    try:
+        existing = User.query.filter_by(username=username).first()
+        if existing:
+            return
+
+        admin = User(username=username, email=email, is_verified=True)
+        admin.set_password(password)
+        db.session.add(admin)
+        db.session.commit()
+
+        app.logger.warning(
+            "Created default admin account '%s' with the default password. "
+            "Change it immediately or set DEFAULT_ADMIN_PASSWORD / "
+            "DEFAULT_ADMIN_DISABLE env vars before deploying to production.",
+            username,
+        )
+    except Exception as e:  # pragma: no cover - defensive bootstrap
+        db.session.rollback()
+        app.logger.error("Failed to seed default admin user: %s", e)
 
 
 if __name__ == '__main__':

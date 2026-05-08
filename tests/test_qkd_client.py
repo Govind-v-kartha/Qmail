@@ -9,9 +9,20 @@ from qmail.km_client.mock_km import MockQKDClient
 class TestMockQKDClient:
     """Test Mock QKD Client"""
     
-    def setup_method(self):
-        """Set up test fixtures"""
-        self.client = MockQKDClient()
+    def setup_method(self, tmp_path_factory=None):
+        """Set up test fixtures with isolated key store"""
+        import tempfile, os
+        # Use a unique temp file so persisted state from prior runs doesn't leak
+        self._tmp_dir = tempfile.mkdtemp(prefix="qkd_test_")
+        self.client = MockQKDClient(
+            persist_keys=False,
+            key_store_file=os.path.join(self._tmp_dir, "keys.json"),
+        )
+
+    def teardown_method(self):
+        """Clean up temp directory"""
+        import shutil
+        shutil.rmtree(getattr(self, "_tmp_dir", ""), ignore_errors=True)
     
     def test_client_initialization(self):
         """Test client initializes correctly"""

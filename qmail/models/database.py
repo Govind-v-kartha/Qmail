@@ -2,12 +2,17 @@
 Database models for QMail
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
+
+
+def utcnow():
+    """Timezone-naive UTC datetime (compatible with existing columns)."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class User(UserMixin, db.Model):
@@ -18,7 +23,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
     last_login = db.Column(db.DateTime)
     is_active = db.Column(db.Boolean, default=True)
     is_verified = db.Column(db.Boolean, default=False)
@@ -61,7 +66,7 @@ class User(UserMixin, db.Model):
         """Generate password reset token"""
         import secrets
         self.reset_token = secrets.token_urlsafe(32)
-        self.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
+        self.reset_token_expiry = utcnow() + timedelta(hours=1)
         return self.reset_token
     
     def verify_reset_token(self, token):
@@ -70,7 +75,7 @@ class User(UserMixin, db.Model):
             return False
         if self.reset_token != token:
             return False
-        if datetime.utcnow() > self.reset_token_expiry:
+        if utcnow() > self.reset_token_expiry:
             return False
         return True
     
@@ -83,7 +88,7 @@ class User(UserMixin, db.Model):
         """Check if account is locked"""
         if not self.account_locked_until:
             return False
-        if datetime.utcnow() > self.account_locked_until:
+        if utcnow() > self.account_locked_until:
             # Lock expired, clear it
             self.account_locked_until = None
             self.failed_login_attempts = 0
@@ -95,7 +100,7 @@ class User(UserMixin, db.Model):
         self.failed_login_attempts += 1
         if self.failed_login_attempts >= 5:
             # Lock account for 30 minutes
-            self.account_locked_until = datetime.utcnow() + timedelta(minutes=30)
+            self.account_locked_until = utcnow() + timedelta(minutes=30)
     
     def reset_failed_logins(self):
         """Reset failed login counter on successful login"""
@@ -154,7 +159,7 @@ class Email(db.Model):
     # Timestamps
     received_at = db.Column(db.DateTime)
     sent_at = db.Column(db.DateTime)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
     
     # Folder and Category
     folder = db.Column(db.String(50), default='inbox')
@@ -212,8 +217,8 @@ class Contact(db.Model):
     has_qkd = db.Column(db.Boolean, default=False)
     preferred_security_level = db.Column(db.Integer, default=2)
     
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=utcnow)
     
     def to_dict(self):
         """Convert to dictionary"""
@@ -245,7 +250,7 @@ class KeyUsageLog(db.Model):
     
     email_id = db.Column(db.Integer, db.ForeignKey('emails.id'))
     
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=utcnow)
     
     def to_dict(self):
         """Convert to dictionary"""
@@ -280,7 +285,7 @@ class Settings(db.Model):
     # Notification settings
     email_notifications = db.Column(db.Boolean, default=True)
     
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=utcnow, onupdate=utcnow)
     
     def to_dict(self):
         """Convert to dictionary"""
@@ -323,7 +328,7 @@ class EmailAttachment(db.Model):
     encryption_metadata = db.Column(db.Text)  # JSON metadata
     
     # Timestamps
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
     
     def to_dict(self):
         """Convert to dictionary"""

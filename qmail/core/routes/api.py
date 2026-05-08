@@ -7,7 +7,7 @@ from flask_login import login_required, current_user
 from datetime import datetime
 import logging
 
-from qmail.models.database import db, Email, Contact
+from qmail.models.database import db, Email, Contact, utcnow
 from qmail.crypto.message_cipher import MessageCipher
 from qmail.crypto.encryption_engine import SecurityLevel
 
@@ -164,7 +164,7 @@ def log_security_event():
         # Log the security event
         event_type = data.get('type')
         details = data.get('details', '')
-        timestamp = data.get('timestamp', datetime.utcnow().isoformat())
+        timestamp = data.get('timestamp', utcnow().isoformat())
         user_agent = data.get('userAgent', request.headers.get('User-Agent'))
         session_id = data.get('sessionId', '')
         url = data.get('url', '')

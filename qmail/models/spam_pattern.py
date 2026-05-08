@@ -2,8 +2,7 @@
 Spam Pattern Learning Model
 """
 
-from datetime import datetime
-from qmail.models.database import db
+from qmail.models.database import db, utcnow
 
 
 class SpamPattern(db.Model):
@@ -26,8 +25,8 @@ class SpamPattern(db.Model):
     correct_count = db.Column(db.Integer, default=1)  # How many times user confirmed
     
     # Timestamps
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
+    updated_at = db.Column(db.DateTime, default=utcnow, onupdate=utcnow)
     
     def __repr__(self):
         return f'<SpamPattern {self.pattern_type}: {self.sender_domain}>'

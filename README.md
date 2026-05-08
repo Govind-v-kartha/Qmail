@@ -40,39 +40,83 @@ A quantum-secure email client that integrates Quantum Key Distribution (QKD) wit
    # Edit .env with your settings
    ```
 
-5. **Initialize database**
+5. **Run the application** (database tables are auto-created on first run)
    ```bash
-   python -m qmail.core.init_db
+   python run.py
    ```
 
-6. **Run the application**
-   ```bash
-   flask run
-   ```
-
-7. **Access the application**
+6. **Access the application**
    ```
    Open your browser and navigate to: http://localhost:5000
    ```
+
+7. **Log in with the default admin account**
+   ```
+   Username: admin
+   Password: admin
+   ```
+   ⚠️ **Change this password immediately.** Override via the
+   `DEFAULT_ADMIN_USERNAME` / `DEFAULT_ADMIN_PASSWORD` env vars, or set
+   `DEFAULT_ADMIN_DISABLE=true` to skip auto-seeding entirely.
+
+## ☁️ Deploy to Vercel (https://quantmail.vercel.app)
+
+The repo is already wired for Vercel via [vercel.json](vercel.json) and
+[app.py](app.py). To deploy to `quantmail.vercel.app`:
+
+1. **Install the Vercel CLI** (one-time):
+   ```bash
+   npm i -g vercel
+   ```
+2. **Log in and link the project**:
+   ```bash
+   vercel login
+   vercel link --project quantmail
+   ```
+3. **Set required environment variables** (only need to do this once):
+   ```bash
+   vercel env add SECRET_KEY production
+   vercel env add DATABASE_URL production           # PostgreSQL URL
+   vercel env add DEFAULT_ADMIN_USERNAME production # e.g. admin
+   vercel env add DEFAULT_ADMIN_PASSWORD production # use a strong password!
+   vercel env add DEFAULT_ADMIN_EMAIL production
+   ```
+4. **Deploy**:
+   ```bash
+   vercel --prod
+   ```
+
+After the first successful deploy, the site will be available at
+<https://quantmail.vercel.app>. The default admin account is auto-seeded on
+first request — log in, change the password, and consider setting
+`DEFAULT_ADMIN_DISABLE=true` afterwards.
 
 ## 📁 Project Structure
 
 ```
 Qmail/
 ├── qmail/                  # Main application package
-│   ├── core/              # Core application logic
+│   ├── core/              # Core application logic + routes
 │   ├── crypto/            # Encryption engine
-│   ├── email_handler/     # SMTP/IMAP/POP3 handlers
+│   ├── email_handler/     # SMTP/IMAP handlers + attachments
 │   ├── km_client/         # Quantum Key Manager client
 │   ├── models/            # Database models
 │   ├── static/            # CSS, JS, images
-│   └── templates/         # HTML templates
-├── tests/                 # Test suite
-├── config/                # Configuration files
+│   ├── templates/         # HTML templates
+│   └── utils/             # Sanitizers and classifiers
+├── tests/                 # Automated test suite (pytest)
+├── scripts/               # One-off helper scripts
+│   ├── db/                # Database migration helpers
+│   ├── dev/               # Setup, demo, diagnostic helpers
+│   └── manual_tests/      # Ad-hoc/manual exploration scripts
 ├── docs/                  # Documentation
+├── run.py                 # Local development entry point
+├── app.py                 # Vercel / serverless entry point
+├── wsgi.py                # WSGI entry point (gunicorn)
 ├── requirements.txt       # Python dependencies
-├── .env.example          # Environment variables template
-└── README.md             # This file
+├── requirements-vercel.txt # Vercel-only minimal dependencies
+├── .env.example           # Environment variables template
+└── README.md              # This file
 ```
 
 ## 🔐 Security Levels
@@ -132,8 +176,26 @@ pytest tests/test_encryption.py
 For detailed documentation, see the [docs](./docs) directory:
 
 - [CONTEXT.md](./docs/CONTEXT.md) - Project overview and architecture
-- API documentation (coming soon)
-- Deployment guide (coming soon)
+- [API.md](./docs/API.md) - HTTP API reference
+- [ENV_SETUP.md](./docs/ENV_SETUP.md) - Environment configuration
+- [VERCEL_POSTGRESQL_SETUP.md](./docs/VERCEL_POSTGRESQL_SETUP.md) - Vercel deployment with Postgres
+- [ATTACHMENTS.md](./docs/ATTACHMENTS.md) - Encrypted attachments
+- [HTML_EMAIL_RENDERING.md](./docs/HTML_EMAIL_RENDERING.md) - HTML email rendering
+- [explain/](./docs/explain/) - In-depth crypto/architecture walkthrough
+
+## 🛠️ Helper Scripts
+
+Utility scripts live under `scripts/`:
+
+- `scripts/db/` - SQLite migrations and schema fixers (e.g. `recreate_database.py`).
+- `scripts/dev/` - Developer utilities (`create_admin.py`, `demo.py`, `diagnostic.py`, `setup.py`).
+- `scripts/manual_tests/` - Manual / ad-hoc verification scripts.
+
+Run from the project root, for example:
+```bash
+python scripts/dev/create_admin.py
+python scripts/db/recreate_database.py
+```
 
 ## 🤝 Contributing
 
