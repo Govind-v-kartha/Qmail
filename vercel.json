@@ -1,5 +1,4 @@
 {
-  "buildCommand": "pip install --prefer-binary -r requirements-vercel.txt",
   "builds": [
     {
       "src": "app.py",
@@ -10,11 +9,8 @@
       }
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "app.py"
-    }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/app.py" }
   ],
   "env": {
     "FLASK_APP": "app.py",
