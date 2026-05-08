@@ -1,51 +1,42 @@
 """
-Flask app entrypoint for Vercel deployment
-Optimized for serverless environment
+Flask app entrypoint for Vercel deployment.
+
+The Vercel Python runtime statically scans this module for a top-level
+``app`` symbol, so the assignment must NOT be nested inside a try/except
+or any other compound statement.
 """
 
 import os
 import sys
 import logging
+
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables from .env (no-op on Vercel where env is injected)
 load_dotenv()
 
-# Set environment for Vercel
+# Set production environment when running on Vercel
 if os.getenv('VERCEL'):
-    os.environ['FLASK_ENV'] = 'production'
+    os.environ.setdefault('FLASK_ENV', 'production')
 
 # Configure logging early
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 )
 logger = logging.getLogger(__name__)
-
 logger.info("Starting QMail Flask app initialization...")
 
-try:
-    logger.info("Importing Flask app factory...")
-    from qmail.app import create_app
-    
-    logger.info("Creating Flask application instance...")
-    app = create_app()
-    
-    logger.info("Initializing database...")
-    with app.app_context():
-        from qmail.models.database import db
-        # Create tables if they don't exist
-        db.create_all()
-        logger.info("Database tables created successfully")
-    
-    logger.info("Flask app initialized successfully!")
-        
-except Exception as e:
-    logger.error(f"FATAL ERROR: Failed to initialize Flask app: {str(e)}")
-    import traceback
-    logger.error(traceback.format_exc())
-    print(f"ERROR: Failed to initialize Flask app: {str(e)}", file=sys.stderr)
-    raise
+from qmail.app import create_app  # noqa: E402
+
+# Top-level WSGI app for Vercel / gunicorn / wsgi.py
+app = create_app()
+
+# Vercel also looks for ``handler`` in some runtimes
+handler = app
+
+logger.info("Flask app initialized successfully!")
+
 
 if __name__ == '__main__':
     # Get configuration from environment
